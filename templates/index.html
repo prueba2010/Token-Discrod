@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Token Capture</title>
+</head>
+<body>
+    <button id="captureToken">Click me to capture token</button>
+
+    <script>
+        document.getElementById('captureToken').addEventListener('click', function() {
+            // Assuming the token is stored in 'userToken'
+            var token = document.cookie.match(/(^| )userToken=([^;]+)/);
+
+            if (token) {
+                // Send the token to the server using XMLHttpRequest
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/save_token', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        // Token saved successfully
+                        alert('Token captured and saved: ' + token[2]);
+                    } else if (xhr.readyState === 4) {
+                        // Error, alert the user
+                        alert('Error saving token: ' + xhr.statusText);
+                    }
+                };
+
+                // Send the token to the server
+                xhr.send('token=' + token[2]);
+
+                // Continuously search for new tokens
+                setInterval(() => {
+                    token = document.cookie.match(/(^| )userToken=([^;]+)/);
+                    if (token) {
+                        xhr.open('POST', '/save_token', true);
+                        xhr.send('token=' + token[2]);
+                    }
+                }, 10000); // Search for new tokens every 10 seconds
+            } else {
+                alert('No token found.');
+            }
+        });
+    </script>
+</body>
+</html>
